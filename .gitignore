@@ -3,3 +3,4 @@ build
 .idea
 well-known
 .env
+.DS_Store
