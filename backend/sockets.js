@@ -17,7 +17,7 @@ class WebsocketHandler {
         }
         this.ws = new WebSocketServer(this.opts);
 
-        if(ENV !== 'local') this.server.listen(WS_PORT);
+        if(ENV !== 'local') this.opts.server.listen(WS_PORT);
     }
 
     BroadcastData(data) {
