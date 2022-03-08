@@ -1,0 +1,42 @@
+.App {
+  text-align: center;
+  display: inline-block;
+  align-items: center;
+}
+
+a {
+  color: black;
+}
+
+.item {
+  float: left;
+  margin: 10px;
+  width: 200px;
+  border-top: 1px solid darkgrey;
+  border-radius: 10px;
+  display: flex;
+  height: 90px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.active-item {
+  background-color: lightgreen;
+  border: 2px solid forestgreen;
+}
+
+.inactive-item {
+  background-color: lightcoral;
+  border: 2px solid darkred;
+}
+
+.protected-item {
+  background-color: gold;
+  border: 2px solid darkgoldenrod;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
