@@ -6,15 +6,18 @@ const { WS_PORT, ENV} = require("./config");
 
 class WebsocketHandler {
     constructor() {
+        this.server = ENV === 'local'
+            ? undefined
+            : https.createServer({
+            key: fs.readFileSync(path.resolve(process.cwd(), 'certs/privkey.pem'), 'utf8').toString(),
+            cert: fs.readFileSync(path.resolve(process.cwd(), 'certs/fullchain.pem'), 'utf8').toString(),
+        })
         this.ws = new WebSocketServer({
-            port: WS_PORT,
-            server: ENV === 'local'
-                ? undefined
-                : https.createServer({
-                    key: fs.readFileSync(path.resolve(process.cwd(), 'certs/privkey.pem'), 'utf8').toString(),
-                    cert: fs.readFileSync(path.resolve(process.cwd(), 'certs/fullchain.pem'), 'utf8').toString(),
-                })
+            port: ENV === 'local' ? WS_PORT : undefined,
+            server: this.server,
         });
+
+        if(ENV !== 'local') this.server.listen(WS_PORT);
     }
 
     BroadcastData(data) {
