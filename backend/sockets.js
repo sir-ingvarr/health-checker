@@ -1,9 +1,20 @@
 const { WebSocketServer } = require('ws');
-const { WS_PORT } = require("./config");
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
+const { WS_PORT, ENV} = require("./config");
 
 class WebsocketHandler {
     constructor() {
-        this.ws = new WebSocketServer({ port: WS_PORT });
+        this.ws = new WebSocketServer({
+            port: WS_PORT,
+            server: ENV === 'local'
+                ? undefined
+                : https.createServer({
+                    key: fs.readFileSync(path.resolve(process.cwd(), 'certs/privkey.pem'), 'utf8').toString(),
+                    cert: fs.readFileSync(path.resolve(process.cwd(), 'certs/fullchain.pem'), 'utf8').toString(),
+                })
+        });
     }
 
     BroadcastData(data) {
