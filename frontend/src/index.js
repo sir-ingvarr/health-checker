@@ -1,23 +1,24 @@
-/* eslint-disable import/first */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+const { REACT_APP_API_URL: API_URL, REACT_APP_WS_URL: WS_URL } = process.env;
 
 async function refresh(callback) {
-    fetch('https://api.is-up.link:24499/get-statuses/')
+    fetch(`${API_URL}/get-statuses/`)
         .then((result) => {
             result.json().then(callback)
         })
 }
 
 async function connectToWs() {
-    const ws = new WebSocket('wss://ws.is-up.link:25945');
+    const ws = new WebSocket(WS_URL);
     ws.addEventListener('open', function () {
         console.info('ws connected');
     });
     return ws;
 }
+
 (async () => {
     const ws = await connectToWs();
     ReactDOM.render(

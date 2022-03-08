@@ -1,26 +1,11 @@
 const axios = require('axios');
-const https = require("https");
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
-const { API_PORT, DELAY, ENV } = require('./config');
-const app = require('./api');
+const {startServer} = require('./api');
+const { DELAY } = require('./config');
 const list = require('./list');
 const sitesMap = require('./sites-map');
 const wsHandler = require('./sockets');
 
 let interval;
-
-const startServer = () => {
-    const cb = app.callback();
-    const server = ENV === 'local'
-        ? http.createServer(cb)
-        : https.createServer({
-            key: fs.readFileSync(path.resolve(process.cwd(), 'certs/privkey.pem'), 'utf8').toString(),
-            cert: fs.readFileSync(path.resolve(process.cwd(), 'certs/fullchain.pem'), 'utf8').toString(),
-        }, cb)
-    server.listen(API_PORT).on("listening", () => console.log(`listening ${API_PORT}`));
-}
 
 const healthCheck = () => {
     list.forEach(async (element) => requestWebsite(element, 'https'));
@@ -51,11 +36,11 @@ const detectFail = (e) => {
     if(code) {
         if(code === "ECONNRESET") return "sleeping";
         if(code === "ENOTFOUND") return "sleeping";
-        if(code === "ECONNREFUSED") return "block?";
+        if(code === "ECONNREFUSED") return "protected?";
     }
     if(!response) return;
     if(response.status === 503) return "sleeping";
-    if(response.status === 403) return "block";
+    if(response.status === 403) return "protected";
 }
 
 const updateSiteData = (element, alive, reason, time) => {
