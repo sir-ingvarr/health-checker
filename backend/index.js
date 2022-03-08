@@ -1,6 +1,10 @@
 const axios = require('axios');
+const https = require("https");
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const { API_PORT, DELAY, ENV } = require('./config');
 const app = require('./api');
-const { API_PORT, DELAY } = require('./config');
 const list = require('./list');
 const sitesMap = require('./sites-map');
 const wsHandler = require('./sockets');
@@ -8,7 +12,14 @@ const wsHandler = require('./sockets');
 let interval;
 
 const startServer = () => {
-    app.listen(API_PORT).on("listening", () => console.log(`listening ${API_PORT}`));
+    const cb = app.callback();
+    const server = ENV === 'local'
+        ? http.createServer(cb)
+        : https.createServer({
+            key: fs.readFileSync(path.resolve(process.cwd(), 'certs/privkey.pem'), 'utf8').toString(),
+            cert: fs.readFileSync(path.resolve(process.cwd(), 'certs/fullchain.pem'), 'utf8').toString(),
+        }, cb)
+    server.listen(API_PORT).on("listening", () => console.log(`listening ${API_PORT}`));
 }
 
 const healthCheck = () => {

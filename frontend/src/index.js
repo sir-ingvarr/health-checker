@@ -12,7 +12,7 @@ async function refresh(callback) {
 }
 
 async function connectToWs() {
-    const ws = new WebSocket('ws://ws.is-up.link:25945');
+    const ws = new WebSocket('wss://ws.is-up.link:25945');
     ws.addEventListener('open', function () {
         console.info('ws connected');
     });
