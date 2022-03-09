@@ -1,112 +1,32 @@
-module.exports = [
-    "my.bank-hlynov.ru",
-    "link.centrinvest.ru",
-    "chbrr.crimea.com",
-    "enter.unicredit.ru",
-    "ria.ru",
-    "fsb.ru",
-    "yaplakal.com",
-    "gazeta.ru",
-    "kp.ru",
-    "riafan.ru",
-    "kommersant.ru",
-    "mk.ru",
-    "rbc.ru",
-    "bezformata.com",
-    "mil.by",
-    "government.by",
-    "president.gov.by",
-    "mvd.gov.by",
-    "kgb.by",
-    "prokuratura.gov.by",
-    "nbrb.by",
-    "belarusbank.by",
-    "brrb.by",
-    "belapb.by",
-    "bankdabrabyt.by",
-    "belinvestbank.by",
-    "bgp.by",
-    "belneftekhim.by",
-    "bellegprom.by",
-    "energo.by",
-    "belres.by",
-    "mininform.gov.by",
-    "belta.by",
-    "sputnik.by",
-    "tvr.by",
-    "sb.by",
-    "belmarket.by",
-    "belarus.by",
-    "belarus24.by",
-    "ont.by",
-    "024.by",
-    "belnovosti.by",
-    "mogilevnews.by",
-    "mil.by",
-    "yandex.by",
-    "slonves.by",
-    "ctv.by",
-    "radiobelarus.by",
-    "radiusfm.by",
-    "alfaradio.by",
-    "radiomir.by",
-    "radiostalica.by",
-    "radiobrestfm.by",
-    "tvrmogilev.by",
-    "minsknews.by",
-    "zarya.by",
-    "grodnonews.by",
-    "mail.rkn.gov.ru",
-    "cloud.rkn.gov.ru",
-    "mvd.gov.ru",
-    "pwd.wto.economy.gov.ru",
-    "stroi.gov.ru",
-    "proverki.gov.ru",
-    "gazprom.ru",
-    "lukoil.ru",
-    "magnit.ru",
-    "nornickel.com",
-    "surgutneftegas.ru",
-    "tatneft.ru",
-    "evraz.com",
-    "nlmk.com",
-    "sibur.ru",
-    "severstal.com",
-    "metalloinvest.com",
-    "nangs.org",
-    "rmk-group.ru",
-    "tmk-group.ru",
-    "ya.ru",
-    "polymetalinternational.com",
-    "uralkali.com",
-    "eurosib.ru",
-    "omk.ru",
-    "sberbank.ru",
-    "vtb.ru",
-    "gazprombank.ru",
-    "gosuslugi.ru",
-    "mos.ru",
-    "kremlin.ru",
-    "government.ru",
-    "mil.ru",
-    "nalog.gov.ru",
-    "customs.gov.ru",
-    "pfr.gov.ru",
-    "rkn.gov.ru",
-    "lukoil.com",
-    "www.gazprom.ru",
-    "nlmk.com",
-    "tektorg.ru",
-    "sberfn.ru",
-    "sber-am.ru",
-    "www.vtbcapital-pr.ru",
-    "region-am.ru",
-    "www.ingosinvest.ru",
-    "goszakaz.ru",
-    "star-pro.ru",
-    "ati.su",
-    "region.ru",
-    "monopoly.ru",
-    "ul.su",
-    "gruzovozkin.pro",
-]
+const {LIST_SOURCE, S3_BUCKET} = require("./config");
+const AWS = require('aws-sdk');
+
+let source = LIST_SOURCE;
+
+if(source === 's3' && !S3_BUCKET) source = 'local';
+
+const handlers = {
+    local: () => {
+        const staticListJSON = require('./assets/sites_list.json');
+        return JSON.parse(staticListJSON);
+    },
+    s3: () => {
+        const s3 = new AWS.S3();
+        const s3Params = {
+            Bucket: S3_BUCKET,
+            Key: 'sites_list.json'
+        };
+
+        return new Promise(resolve => {
+            s3.getObject(s3Params, async function(err, res) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                resolve(JSON.parse(res.Body.toString()));
+            });
+        }).catch(console.log);
+    }
+}
+
+module.exports = handlers[source];
