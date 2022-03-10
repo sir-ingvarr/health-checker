@@ -13,7 +13,7 @@ const setIntervals = (list) => {
 const start = async () => {
     const list = await getList();
     list.forEach(element => {
-        setSiteData(element, false, 'loading', 0);
+        setSiteData(element, false, 'loading', 0, 'https');
     });
     healthCheck(list);
     startServer();
