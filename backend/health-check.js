@@ -12,7 +12,7 @@ const requestWebsite = async (url, protocol) => {
         const res = await axios.get(`${protocol}://${url}`);
         const timeConsumed = Date.now() - startTimestamp;
         if(res && res.status === 200 || res.status === 201) {
-            setSiteData(url, true, null, timeConsumed);
+            setSiteData(url, true, null, timeConsumed, protocol);
             console.log("request to", url, "succeeded in", timeConsumed, "ms");
         }
     } catch (e) {
@@ -20,7 +20,7 @@ const requestWebsite = async (url, protocol) => {
         const reason = detectFail(e);
         if(reason && reason === 'ssl') return requestWebsite(url, 'http');
         console.log("request to", url, "failed in", timeConsumed, "ms with status", reason);
-        setSiteData(url, false, reason, timeConsumed);
+        setSiteData(url, false, reason, timeConsumed, protocol);
     }
 }
 
@@ -38,15 +38,15 @@ const detectFail = (e) => {
     if(response.status === 403) return "protected";
 }
 
-const setSiteData = (element, alive, reason, time) => {
+const setSiteData = (element, alive, reason, time, protocol) => {
     const siteData = sitesMap[element];
     const needSet = !siteData || (siteData.alive !== alive || siteData.reason !== reason  || siteData.time !== time);
     if(!needSet) return;
-    sitesMap[element] = { alive, reason, time };
+    sitesMap[element] = { alive, reason, time, protocol };
     wsHandler.BroadcastData({
         type: "update",
         name: element,
-        data: { alive, reason, time }
+        data: sitesMap[element]
     });
 }
 

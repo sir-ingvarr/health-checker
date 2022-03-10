@@ -71,6 +71,11 @@ input[type=text] {
   border: 2px solid darkgoldenrod;
 }
 
+.loading-item {
+  background-color: floralwhite;
+  border: 2px solid midnightblue;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
