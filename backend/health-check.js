@@ -1,6 +1,19 @@
 const axios = require("axios");
 const sitesMap = require("./sites-map");
 const wsHandler = require("./sockets");
+const util = require("util");
+const dns = require("dns");
+
+const lookup = util.promisify(dns.lookup);
+
+const resolveServerIp = async host => {
+    try {
+        const result = await lookup(host);
+        return result;
+    } catch (e) {
+        console.log(e.message);
+    }
+}
 
 const healthCheck = list => {
     list.forEach(element => requestWebsite(element, 'https'));
@@ -27,22 +40,21 @@ const requestWebsite = async (url, protocol) => {
 const detectFail = (e) => {
     const {message, response, code} = e;
     if(/ETIMEDOUT/gi.test(message)) return "timeout";
-    if(/EPROTO/gi.test(message)) return "ssl";
+    if(/EPROTO/gi.test(message) || /certificate/gi.test(message) || code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') return "ssl";
     if(code) {
-        if(code === "ECONNRESET") return "sleeping";
-        if(code === "ENOTFOUND") return "sleeping";
+        if(["EHOSTUNREACH", "ECONNRESET", "ENOTFOUND"].includes(code)) return "sleeping";
         if(code === "ECONNREFUSED") return "protected?";
     }
     if(!response) return;
-    if(response.status === 503) return "sleeping";
+    if([503, 502, 453].includes(response.status)) return "sleeping";
     if(response.status === 403) return "protected";
 }
 
-const setSiteData = (element, alive, reason, time, protocol) => {
+const setSiteData = (element, alive, reason, time, protocol, ip) => {
     const siteData = sitesMap[element];
     const needSet = !siteData || (siteData.alive !== alive || siteData.reason !== reason  || siteData.time !== time);
     if(!needSet) return;
-    sitesMap[element] = { alive, reason, time, protocol };
+    sitesMap[element] = { alive, reason, time, protocol, ip: ip || siteData.ip };
     wsHandler.BroadcastData({
         type: "update",
         name: element,
@@ -50,4 +62,4 @@ const setSiteData = (element, alive, reason, time, protocol) => {
     });
 }
 
-module.exports = { healthCheck, setSiteData };
+module.exports = { healthCheck, setSiteData, resolveServerIp };

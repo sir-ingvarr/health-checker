@@ -1,10 +1,10 @@
 const {startServer} = require('./api');
 const { DELAY } = require('./config');
 const getList = require('./list');
-const {healthCheck, setSiteData} = require("./health-check");
+const {healthCheck, setSiteData, resolveServerIp} = require("./health-check");
+const url = require("url");
 
 let interval;
-
 
 const setIntervals = (list) => {
     interval = setInterval(() => healthCheck(list), DELAY)
@@ -12,9 +12,12 @@ const setIntervals = (list) => {
 
 const start = async () => {
     const list = await getList();
-    list.forEach(element => {
-        setSiteData(element, false, 'loading', 0, 'https');
-    });
+    for (const element of list) {
+        const urlData = url.parse(`https://${element}`);
+        const ip = await resolveServerIp(urlData.host || element);
+        const address = ip ? ip.address : 'unresolved';
+        setSiteData(element, false, 'loading', 0, 'https', address);
+    }
     healthCheck(list);
     startServer();
     setIntervals(list);

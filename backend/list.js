@@ -8,7 +8,7 @@ if(source === 's3' && !S3_BUCKET) source = 'local';
 const handlers = {
     local: () => {
         const staticListJSON = require('./assets/sites_list.json');
-        return JSON.parse(staticListJSON);
+        return staticListJSON;
     },
     s3: () => {
         const s3 = new AWS.S3();
