@@ -10,11 +10,11 @@ a {
 .item {
   float: left;
   margin: 10px;
-  width: 200px;
+  width: 250px;
   border-top: 1px solid darkgrey;
   border-radius: 10px;
   display: flex;
-  height: 90px;
+  height: 150px;
   justify-content: space-between;
   /*align-items: center;*/
   flex-direction: column;

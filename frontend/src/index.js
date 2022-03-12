@@ -26,7 +26,8 @@ const DataProvider = ({ children, childrenProps }) => {
         try {
             const eventData = JSON.parse(payload.data);
             const { name, data } = eventData;
-            updateItems({ ...itemsRef.current, [name]: data });
+            const currentData = itemsRef.current[name] || {};
+            updateItems({ ...itemsRef.current, [name]: { ...currentData, ...data }});
         } catch (e) {
             console.error(e);
         }

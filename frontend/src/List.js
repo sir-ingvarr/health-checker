@@ -1,7 +1,7 @@
 import './App.css';
 import React, {useState} from 'react';
 
-const Item = ({protocol, name, alive, reason, time}) => {
+const Item = ({protocol, name, alive, reason, time, ip, ports}) => {
     let className;
     if(reason === 'loading') className = 'loading-item';
     else {
@@ -16,8 +16,14 @@ const Item = ({protocol, name, alive, reason, time}) => {
                 <a href={`${protocol}://${name}`} target='_blank' rel='noreferrer'>
                     <span><b>{`${protocol}://${name}`}</b></span>
                 </a>
+                <span><b>{`IP: ${ip}`}</b></span>
+                <span>{`Open ports: ${ports && ports.length ? ports.join(',') : ip && !ports ? 'loading...' : 'none'}`}</span>
                 {reason ? <span>Reason: {reason}</span> : null}
                 {time ? <span>Response time: {time} ms</span> : null}
+                { ip
+                    ? <input type='button' value='Copy IP' onClick={() => navigator.clipboard.writeText(ip)}/>
+                    : null
+                }
                 <input type='button' value='Copy address' onClick={() => navigator.clipboard.writeText(name)}/>
             </div>
     );
@@ -88,6 +94,8 @@ const List = ({ refresh, items }) => {
                         reason={item.reason}
                         time={item.time}
                         protocol={item.protocol}
+                        ip={item.address}
+                        ports={item.portsMap}
                     />
                 })
             }
