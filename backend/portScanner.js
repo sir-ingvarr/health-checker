@@ -2,7 +2,7 @@ const net = require('net');
 const { parentPort, workerData } = require('worker_threads');
 const { Socket } = net;
 const MAX_PORT = 65535;
-const HALF_PORTS = 32250;
+const MAX_CONCURRENT = 10000;
 
 
 const checkPort = (port, host) => new Promise(resolve => {
@@ -20,26 +20,28 @@ const checkPort = (port, host) => new Promise(resolve => {
     socket.connect(port, host);
 }).catch(console.error);
 
+const timeout = time => new Promise(resolve => setTimeout(resolve, time));
+
 const scanAvailablePorts = async (host = workerData.address) => {
     const portsMap = [];
     let promises = [];
-    // 1 half at a time to leave free ports
-    for(let i = 0; i <= HALF_PORTS; i++) {
+
+    for(let i = 0; i <= MAX_PORT; i++) {
         promises.push(checkPort(i, host).then(result => portsMap[i] = result));
+        if(promises.length === MAX_CONCURRENT) {
+            await Promise.all(promises);
+            promises = [];
+            await timeout(100)
+        }
     }
-    const resultsHalf1 = await Promise.all(promises);
-    promises = [];
-    for(let i = HALF_PORTS; i <= MAX_PORT; i++) {
-        promises.push(checkPort(i, host).then(result => portsMap[i] = result));
-    }
-    const resultsHalf2 = await Promise.all(promises);
-    const fullResult = [].concat(resultsHalf1, resultsHalf2);
-    const openedPorts = fullResult.reduce((acc, val, index) => {
+
+    const openedPorts = portsMap.reduce((acc, val, index) => {
             if(!val) return acc;
             acc.push(index);
             return acc;
         },
         []);
+    console.log(openedPorts)
     if(parentPort) {
         parentPort.postMessage(openedPorts);
         return;
