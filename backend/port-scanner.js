@@ -2,8 +2,6 @@ const net = require('net');
 const { parentPort, workerData } = require('worker_threads');
 const { Socket } = net;
 const MAX_PORT = 65535;
-const MAX_CONCURRENT = 10000;
-
 
 const checkPort = (port, host) => new Promise(resolve => {
     const socket = new Socket();
@@ -22,13 +20,14 @@ const checkPort = (port, host) => new Promise(resolve => {
 
 const timeout = time => new Promise(resolve => setTimeout(resolve, time));
 
-const scanAvailablePorts = async (host = workerData.address) => {
+const scanAvailablePorts = async (host, maxConcurrent) => {
+    if(!host) return;
     const portsMap = [];
     let promises = [];
 
     for(let i = 0; i <= MAX_PORT; i++) {
         promises.push(checkPort(i, host).then(result => portsMap[i] = result));
-        if(promises.length === MAX_CONCURRENT) {
+        if(promises.length === maxConcurrent) {
             await Promise.all(promises);
             promises = [];
             await timeout(100)
@@ -48,8 +47,9 @@ const scanAvailablePorts = async (host = workerData.address) => {
     }
     return openedPorts;
 }
+
 if(parentPort) {
-    scanAvailablePorts();
+    scanAvailablePorts(workerData.address, workerData.maxConcurrent);
 }
 
 module.exports = { scanAvailablePorts };

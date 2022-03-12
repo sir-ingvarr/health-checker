@@ -1,8 +1,9 @@
 const axios = require("axios");
-const sitesMap = require("./sites-map");
-const wsHandler = require("./sockets");
+const {setSiteData, getSiteData} = require("./sites-map");
+
 const util = require("util");
 const dns = require("dns");
+const {addJobToQueue} = require("./ports-worker");
 
 const lookup = util.promisify(dns.lookup);
 
@@ -25,6 +26,8 @@ const requestWebsite = async (url, protocol) => {
         const res = await axios.get(`${protocol}://${url}`);
         const timeConsumed = Date.now() - startTimestamp;
         if(res && res.status === 200 || res.status === 201) {
+            const currentData = getSiteData(url);
+            if(currentData && (!currentData.alive || !currentData.portsMap)) addJobToQueue(url);
             setSiteData(url, { alive: true, reason: null, time: timeConsumed, protocol});
             console.log("request to", url, "succeeded in", timeConsumed, "ms");
         }
@@ -50,25 +53,4 @@ const detectFail = (e) => {
     if(response.status === 403) return "protected";
 }
 
-const setSiteData = (element, data) => {
-    const siteData = sitesMap[element];
-    const passedKeys = Object.keys(data);
-    let needSet = false;
-    for(let key of passedKeys) {
-        if(!siteData || !siteData[key] || siteData[key] !== data[key]) {
-            needSet = true;
-            break;
-        }
-    }
-    if(!needSet) return;
-    sitesMap[element] = { ...(siteData || {}), ...data };
-    wsHandler.BroadcastData({
-        type: "update",
-        name: element,
-        data: sitesMap[element]
-    });
-}
-
-const getSiteData = element => sitesMap[element];
-
-module.exports = { healthCheck, setSiteData, resolveServerIp, getSiteData };
+module.exports = { healthCheck, resolveServerIp };

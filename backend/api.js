@@ -2,7 +2,7 @@ const Koa = require("koa");
 const koaRouter = require("koa-router");
 const {ENV, API_PORT} = require("./config");
 const list = require("./list");
-const sitesMap = require('./sites-map');
+const {sitesMap} = require('./sites-map');
 const http = require("http");
 const https = require("https");
 const fs = require("fs");
@@ -18,6 +18,7 @@ router.get('/list', (ctx, next) => {
 router.get('/get-statuses', (ctx, next) => {
     ctx.body = JSON.stringify(sitesMap);
 });
+
 
 router.get('/', (ctx, next) => {
     ctx.body = "ok";

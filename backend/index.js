@@ -1,9 +1,10 @@
 const url = require("url");
-const { Worker, MessageChannel } = require('worker_threads');
 const {startServer} = require('./api');
 const { DELAY } = require('./config');
 const getList = require('./list');
-const {healthCheck, setSiteData, resolveServerIp, getSiteData} = require("./health-check");
+const {healthCheck, resolveServerIp} = require("./health-check");
+const {setSiteData} = require("./sites-map");
+const {addJobToQueue} = require("./ports-worker");
 
 let interval;
 
@@ -15,27 +16,16 @@ const start = async () => {
     const list = await getList();
     for (const element of list) {
         const urlData = url.parse(`https://${element}`);
+        console.log('adding', element);
         setSiteData(element, { alive: false, reason: 'loading', time: 0, protocol: 'https'});
         const ip = await resolveServerIp(urlData.host || element);
         const address = ip ? ip.address : null;
         setSiteData(element, {address});
+        addJobToQueue(element);
     }
     healthCheck(list);
     startServer();
     setIntervals(list);
-    const messageChannel = new MessageChannel();
-    spawnPortScanner(list, 0, messageChannel);
-}
-
-const spawnPortScanner = (list, id) => {
-    const data = getSiteData(list[id]);
-    const {address} = data;
-    if(!address) spawnPortScanner(list, ++id);
-    const worker = new Worker('./portScanner.js', { workerData: { address: address || list[id] } });
-    worker.once('message', portsMap => {
-        setSiteData(list[id], {portsMap});
-        spawnPortScanner(list, ++id);
-    })
 }
 
 const exit = async code => {
