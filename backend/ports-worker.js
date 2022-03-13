@@ -4,7 +4,10 @@ const {Worker} = require("worker_threads");
 const jobQueue = [];
 let jobRunning = false;
 
+let worker;
+
 const spawnPortScanner = host => {
+    if(jobRunning) return;
     const data = getSiteData(host);
     const {address} = data;
     if(!address) {
@@ -12,13 +15,16 @@ const spawnPortScanner = host => {
         return;
     }
     jobRunning = true;
-    const worker = new Worker('./port-scanner.js', { workerData: { address: address || host, maxConcurrent: 1000 } });
-    worker.once('message', portsMap => {
-        worker.terminate().then(() => {
-            setSiteData(host, {portsMap});
-            jobRunning = false;
-            getNextElement();
-        })
+    if(!worker) {
+        worker = new Worker('./port-scanner.js', {workerData: {address: address || host, maxConcurrent: 1000}});
+    }
+    else {
+        worker.postMessage({address: address || host, maxConcurrent: 1000})
+    }
+    worker.on('message', portsMap => {
+        setSiteData(host, {portsMap});
+        jobRunning = false;
+        getNextElement();
     })
 }
 
@@ -31,7 +37,7 @@ const addJobToQueue = host => {
 }
 
 const getNextElement = () => {
-    const nextElement = jobQueue.length ? jobQueue.pop() : null;
+    const nextElement = jobQueue.length ? jobQueue.shift() : null;
     if(!nextElement) return;
     spawnPortScanner(nextElement)
 }

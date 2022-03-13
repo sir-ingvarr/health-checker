@@ -3,7 +3,7 @@ const { parentPort, workerData } = require('worker_threads');
 const { Socket } = net;
 const MAX_PORT = 65535;
 
-const checkPort = (port, host) => new Promise(resolve => {
+const checkPort = (socket, port, host) => new Promise(resolve => {
     const socket = new Socket();
     const resolveResult = (result = false) => () => {
         socket.destroy();
@@ -40,7 +40,6 @@ const scanAvailablePorts = async (host, maxConcurrent) => {
             return acc;
         },
         []);
-    console.log(openedPorts)
     if(parentPort) {
         parentPort.postMessage(openedPorts);
         return;
@@ -50,6 +49,10 @@ const scanAvailablePorts = async (host, maxConcurrent) => {
 
 if(parentPort) {
     scanAvailablePorts(workerData.address, workerData.maxConcurrent);
+    parentPort.on('message', message => {
+        const { address, maxConcurrent } = message;
+        scanAvailablePorts(address, maxConcurrent);
+    })
 }
 
 module.exports = { scanAvailablePorts };

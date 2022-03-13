@@ -17,7 +17,7 @@ const Item = ({protocol, name, alive, reason, time, ip, ports}) => {
                     <span><b>{`${protocol}://${name}`}</b></span>
                 </a>
                 <span><b>{`IP: ${ip}`}</b></span>
-                <span>{`Open ports: ${ports && ports.length ? ports.join(',') : ip && !ports ? 'loading...' : 'none'}`}</span>
+                <span className="port-list">{`Open ports: ${ports && ports.length ? ports.join(',') : ip && !ports ? 'loading...' : 'none'}`}</span>
                 {reason ? <span>Reason: {reason}</span> : null}
                 {time ? <span>Response time: {time} ms</span> : null}
                 { ip
@@ -25,6 +25,13 @@ const Item = ({protocol, name, alive, reason, time, ip, ports}) => {
                     : null
                 }
                 <input type='button' value='Copy address' onClick={() => navigator.clipboard.writeText(name)}/>
+                <a style={{width: '100%'}} href={'data:text/plain;charset=utf-8,'+encodeURIComponent(JSON.stringify({
+                    host: `${protocol}://${name}`,
+                    ip, ports
+                }))} download={`${name}.json`}>
+                <input style={{width: '100%'}} type='button' value='Download JSON'/>
+                </a>
+
             </div>
     );
 }

@@ -4,6 +4,7 @@ const {setSiteData, getSiteData} = require("./sites-map");
 const util = require("util");
 const dns = require("dns");
 const {addJobToQueue} = require("./ports-worker");
+const {ENV} = require("./config");
 
 const lookup = util.promisify(dns.lookup);
 
@@ -27,15 +28,13 @@ const requestWebsite = async (url, protocol) => {
         const timeConsumed = Date.now() - startTimestamp;
         if(res && res.status === 200 || res.status === 201) {
             const currentData = getSiteData(url);
-            if(currentData && (!currentData.alive || !currentData.portsMap)) addJobToQueue(url);
+            if(ENV !== 'local' && currentData && (!currentData.alive || !currentData.portsMap)) addJobToQueue(url);
             setSiteData(url, { alive: true, reason: null, time: timeConsumed, protocol});
-            console.log("request to", url, "succeeded in", timeConsumed, "ms");
         }
     } catch (e) {
         const timeConsumed = Date.now() - startTimestamp;
         const reason = detectFail(e);
         if(reason && reason === 'ssl') return requestWebsite(url, 'http');
-        console.log("request to", url, "failed in", timeConsumed, "ms with status", reason);
         setSiteData(url, { alive: false, reason: reason, time: timeConsumed, protocol});
     }
 }

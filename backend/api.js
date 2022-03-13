@@ -1,5 +1,6 @@
 const Koa = require("koa");
 const koaRouter = require("koa-router");
+const logger = require('koa-logger')
 const {ENV, API_PORT} = require("./config");
 const list = require("./list");
 const {sitesMap} = require('./sites-map');
@@ -19,10 +20,11 @@ router.get('/get-statuses', (ctx, next) => {
     ctx.body = JSON.stringify(sitesMap);
 });
 
-
 router.get('/', (ctx, next) => {
     ctx.body = "ok";
 });
+
+app.use(logger());
 
 app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Origin', '*');

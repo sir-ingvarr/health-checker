@@ -14,16 +14,19 @@ a {
   border-top: 1px solid darkgrey;
   border-radius: 10px;
   display: flex;
-  height: 150px;
+  height: 170px;
   justify-content: space-between;
-  /*align-items: center;*/
   flex-direction: column;
   overflow: hidden;
 }
 
+.port-list {
+  word-wrap: break-word;
+}
+
 @media screen and (max-width: 450px)  {
   .item {
-    width: 100%;
+    width: 100vw;
     margin: 10px 0 0 0;
   }
 }
