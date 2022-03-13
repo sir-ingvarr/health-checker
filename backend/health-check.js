@@ -8,6 +8,8 @@ const {ENV} = require("./config");
 
 const lookup = util.promisify(dns.lookup);
 
+const requestsMap = {};
+
 const resolveServerIp = async host => {
     try {
         const result = await lookup(host);
@@ -18,7 +20,12 @@ const resolveServerIp = async host => {
 }
 
 const healthCheck = list => {
-    list.forEach(element => requestWebsite(element, 'https'));
+    list.forEach(element => {
+        if(!requestsMap[element]) {
+            requestsMap[element] = true;
+            requestWebsite(element, 'https').then(() => requestsMap[element] = false);
+        }
+    });
 }
 
 const requestWebsite = async (url, protocol) => {
