@@ -35,7 +35,8 @@ const requestWebsite = async (url, protocol) => {
         const timeConsumed = Date.now() - startTimestamp;
         if(res && res.status === 200 || res.status === 201) {
             const currentData = getSiteData(url);
-            if(ENV !== 'local' && currentData && (!currentData.alive || !currentData.portsMap)) addJobToQueue(url);
+            if(ENV !== 'local' && currentData && (!currentData.alive || !currentData.portsMap || !currentData.portsMap.length))
+                addJobToQueue(url);
             setSiteData(url, { alive: true, reason: null, time: timeConsumed, protocol});
         }
     } catch (e) {
