@@ -24,7 +24,7 @@ const spawnPortScanner = host => {
         })
     }
     else {
-        worker.postMessage({host, address: address || host, maxConcurrent: 1000})
+        worker.postMessage({host, address: address || host, maxConcurrent: 10000})
     }
 }
 

@@ -20,7 +20,7 @@ const start = async () => {
         const ip = await resolveServerIp(urlData.host || element);
         const address = ip ? ip.address : null;
         setSiteData(element, {address});
-        // if(ENV === 'local') continue;
+        if(ENV === 'local') continue;
         addJobToQueue(element);
     }
     healthCheck(list);
