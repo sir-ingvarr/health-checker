@@ -16,15 +16,15 @@ const spawnPortScanner = host => {
     }
     jobRunning = true;
     if(!worker) {
-        worker = new Worker('./port-scanner.js', {workerData: {address: address || host, maxConcurrent: 1000}});
-        worker.on('message', portsMap => {
-            setSiteData(host, {portsMap});
+        worker = new Worker('./port-scanner.js', {workerData: {host, address: address || host, maxConcurrent: 1000}});
+        worker.on('message', ({scannedHost, portsMap}) => {
+            setSiteData(scannedHost, {portsMap});
             jobRunning = false;
             getNextElement();
         })
     }
     else {
-        worker.postMessage({address: address || host, maxConcurrent: 1000})
+        worker.postMessage({host, address: address || host, maxConcurrent: 1000})
     }
 }
 
