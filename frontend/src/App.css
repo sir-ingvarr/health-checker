@@ -14,7 +14,7 @@ a {
   border-top: 1px solid darkgrey;
   border-radius: 10px;
   display: flex;
-  height: 170px;
+  height: 180px;
   justify-content: space-between;
   flex-direction: column;
   overflow-x: hidden;
