@@ -16,8 +16,8 @@ const setIntervals = () => {
         const oldList = [].concat(sitesList);
         sitesList = await getList();
         if(sitesList.length === oldList.length) return;
-        for(let site of oldList) {
-            if(sitesList.includes(site)) continue;
+        for(let site of sitesList) {
+            if(oldList.includes(site)) continue;
             const urlData = url.parse(`https://${site}`);
             await resolveAndSetIp(urlData.host || site);
             if(ENV === 'local') continue;
