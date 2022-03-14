@@ -14,7 +14,7 @@ const checkPort = (port, host) => new Promise(resolve => {
     socket.on('error', resolveResult());
     socket.on('close', resolveResult());
 
-    socket.setTimeout(5000);
+    socket.setTimeout(10000);
     socket.connect(port, host);
 }).catch(console.error);
 
@@ -30,7 +30,7 @@ const scanAvailablePorts = async (host, address, maxConcurrent) => {
         if(promises.length === maxConcurrent) {
             await Promise.all(promises);
             promises = [];
-            await timeout(100)
+            await timeout(200)
         }
     }
 
@@ -52,7 +52,7 @@ if(parentPort) {
     parentPort.on('message', message => {
         const { address, maxConcurrent, host } = message;
         scanAvailablePorts(host, address, maxConcurrent);
-    })
+    });
 }
 
 module.exports = { scanAvailablePorts };

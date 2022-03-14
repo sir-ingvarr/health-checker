@@ -1,30 +1,16 @@
 const axios = require("axios");
+
 const {setSiteData, getSiteData} = require("./sites-map");
-
-const util = require("util");
-const dns = require("dns");
-const {addJobToQueue} = require("./ports-worker");
+const {addScanPortsJobToQueue} = require("./ports-worker");
 const {ENV} = require("./config");
-
-const lookup = util.promisify(dns.lookup);
 
 const requestsMap = {};
 
-const resolveServerIp = async host => {
-    try {
-        const result = await lookup(host);
-        return result;
-    } catch (e) {
-        console.log(e.message);
-    }
-}
-
 const healthCheck = list => {
     list.forEach(element => {
-        if(!requestsMap[element]) {
-            requestsMap[element] = true;
-            requestWebsite(element, 'https').then(() => requestsMap[element] = false);
-        }
+        if(requestsMap[element]) return;
+        requestsMap[element] = true;
+        requestWebsite(element, 'https').then(() => requestsMap[element] = false);
     });
 }
 
@@ -33,10 +19,10 @@ const requestWebsite = async (url, protocol) => {
     try {
         const res = await axios.get(`${protocol}://${url}`);
         const timeConsumed = Date.now() - startTimestamp;
-        if(res && res.status === 200 || res.status === 201) {
+        if(res && res.status < 400 && res.status > 199) {
             const currentData = getSiteData(url);
             if(ENV !== 'local' && currentData && (!currentData.alive || !currentData.portsMap || !currentData.portsMap.length))
-                addJobToQueue(url);
+                addScanPortsJobToQueue(url);
             setSiteData(url, { alive: true, reason: null, time: timeConsumed, protocol});
         }
     } catch (e) {
@@ -60,4 +46,4 @@ const detectFail = (e) => {
     if(response.status === 403) return "protected";
 }
 
-module.exports = { healthCheck, resolveServerIp };
+module.exports = { healthCheck };

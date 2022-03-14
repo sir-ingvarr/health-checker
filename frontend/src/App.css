@@ -17,7 +17,8 @@ a {
   height: 170px;
   justify-content: space-between;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .port-list {

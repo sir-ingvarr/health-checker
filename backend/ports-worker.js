@@ -16,7 +16,7 @@ const spawnPortScanner = host => {
     }
     jobRunning = true;
     if(!worker) {
-        worker = new Worker('./port-scanner.js', {workerData: {host, address: address || host, maxConcurrent: 1000}});
+        worker = new Worker('./port-scanner.js', {workerData: {host, address: address || host, maxConcurrent: 10000}});
         worker.on('message', ({scannedHost, portsMap}) => {
             setSiteData(scannedHost, {portsMap});
             jobRunning = false;
@@ -28,7 +28,7 @@ const spawnPortScanner = host => {
     }
 }
 
-const addJobToQueue = host => {
+const addScanPortsJobToQueue = host => {
     if(!jobQueue.length && !jobRunning) {
         spawnPortScanner(host);
         return;
@@ -42,4 +42,4 @@ const getNextElement = () => {
     spawnPortScanner(nextElement)
 }
 
-module.exports = { addJobToQueue };
+module.exports = { addScanPortsJobToQueue };
