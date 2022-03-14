@@ -14,7 +14,7 @@ const setIntervals = () => {
     requestInterval = setInterval(() => healthCheck(sitesList), DELAY)
     listRenewInterval = setInterval(async () => {
         const oldList = [].concat(sitesList);
-        sitesList = getList();
+        sitesList = await getList();
         if(sitesList.length === oldList.length) return;
         for(let site of oldList) {
             if(sitesList.includes(site)) continue;

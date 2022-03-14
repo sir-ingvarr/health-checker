@@ -79,7 +79,11 @@ const List = ({ refresh, items }) => {
             } else counters.active++;
             return site;
         })
-        .sort((a, b) => items[b].alive - items[a].alive);
+        .sort((a, b) => {
+            const x = items[a].alive;
+            const y = items[b].alive;
+            return (x === y)? 0 : x? -1 : 1;
+        });
 
     return (
         <React.Fragment>
