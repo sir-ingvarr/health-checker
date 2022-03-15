@@ -17,13 +17,17 @@ const healthCheck = list => {
 const requestWebsite = async (url, protocol) => {
     const startTimestamp = Date.now();
     try {
-        const res = await axios.get(`${protocol}://${url}`);
+        const res = await axios.get(`${protocol}://${url}`, {
+            timeout: 60000
+        });
         const timeConsumed = Date.now() - startTimestamp;
         if(res && res.status < 400 && res.status > 199) {
             const currentData = getSiteData(url);
             if(ENV !== 'local' && currentData && (!currentData.alive || !currentData.portsMap || !currentData.portsMap.length))
                 addScanPortsJobToQueue(url);
             setSiteData(url, { alive: true, reason: null, time: timeConsumed, protocol});
+        } else {
+            setSiteData(url, { alive: false, reason: res.status, time: timeConsumed, protocol});
         }
     } catch (e) {
         const timeConsumed = Date.now() - startTimestamp;
