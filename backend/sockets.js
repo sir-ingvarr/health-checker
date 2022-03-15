@@ -9,7 +9,7 @@ class WebsocketHandler {
         this.opts = {
             port: WS_PORT,
         }
-        if(ENV !== 'local') this.opts =  {
+        if(ENV !== 'prod') this.opts =  {
             server: https.createServer({
                 key: fs.readFileSync(path.resolve(process.cwd(), 'certs/privkey.pem'), 'utf8').toString(),
                 cert: fs.readFileSync(path.resolve(process.cwd(), 'certs/fullchain.pem'), 'utf8').toString(),
@@ -17,7 +17,7 @@ class WebsocketHandler {
         }
         this.ws = new WebSocketServer(this.opts);
 
-        if(ENV !== 'local') this.opts.server.listen(WS_PORT);
+        if(ENV !== 'prod') this.opts.server.listen(WS_PORT);
     }
 
     BroadcastData(data) {

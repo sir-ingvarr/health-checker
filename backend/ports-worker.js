@@ -36,10 +36,16 @@ const addScanPortsJobToQueue = host => {
     if(!jobQueue.includes(host)) jobQueue.push(host);
 }
 
+const removeScanPortsJobFromQueue = host => {
+    const index = jobQueue.indexOf(host);
+    if(index === -1) return;
+    jobQueue.splice(index, 1);
+}
+
 const getNextElement = () => {
     const nextElement = jobQueue.length ? jobQueue.shift() : null;
     if(!nextElement) return;
     spawnPortScanner(nextElement)
 }
 
-module.exports = { addScanPortsJobToQueue };
+module.exports = { addScanPortsJobToQueue, removeScanPortsJobFromQueue };

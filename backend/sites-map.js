@@ -19,6 +19,11 @@ const setSiteData = (element, data) => {
     });
 }
 
+const removeSiteData = element => {
+    if(!sitesMap[element]) return;
+    delete sitesMap[element];
+}
+
 const getSiteData = element => sitesMap[element];
 
 const sitesMap = {};
@@ -26,5 +31,6 @@ const sitesMap = {};
 module.exports = {
     getSiteData,
     setSiteData,
+    removeSiteData,
     sitesMap
 };

@@ -3,8 +3,8 @@ const {startServer} = require('./api');
 const { DELAY, ENV } = require('./config');
 const getList = require('./list');
 const {healthCheck} = require("./health-check");
-const {setSiteData} = require("./sites-map");
-const {addScanPortsJobToQueue} = require("./ports-worker");
+const {setSiteData, removeSiteData} = require("./sites-map");
+const {addScanPortsJobToQueue, removeScanPortsJobFromQueue} = require("./ports-worker");
 const {resolveServerIp} = require("./ip-resolve");
 
 let requestInterval, listRenewInterval;
@@ -19,11 +19,19 @@ const setIntervals = () => {
         for(let site of sitesList) {
             if(oldList.includes(site)) continue;
             const urlData = url.parse(`https://${site}`);
+            setSiteData(site, { alive: false, reason: 'loading', time: 0, protocol: 'https'});
             await resolveAndSetIp(urlData.host || site);
             if(ENV === 'local') continue;
             addScanPortsJobToQueue(urlData.host || site);
         }
-    }, 300000)
+        for(let site of oldList) {
+            if(sitesList.includes(site)) continue;
+            removeSiteData(site);
+            const urlData = url.parse(`https://${site}`);
+            if(ENV === 'local') continue;
+            removeScanPortsJobFromQueue(urlData.host || site);
+        }
+    }, 10000)
 }
 
 const resolveAndSetIp = async host => {

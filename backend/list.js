@@ -1,5 +1,6 @@
 const {LIST_SOURCE, S3_BUCKET} = require("./config");
 const AWS = require('aws-sdk');
+const fs = require("fs");
 
 let source = LIST_SOURCE;
 
@@ -7,8 +8,9 @@ if(source === 's3' && !S3_BUCKET) source = 'local';
 
 const handlers = {
     local: () => {
-        const staticListJSON = require('./assets/sites_list.json');
-        return staticListJSON;
+        const staticListJSONBuffer = fs.readFileSync('./assets/sites_list.json');
+        const listJsonString = staticListJSONBuffer.toString('utf-8');
+        return JSON.parse(listJsonString);
     },
     s3: () => {
         const s3 = new AWS.S3();
