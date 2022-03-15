@@ -37,7 +37,7 @@ app.use(router.routes());
 
 const startServer = () => {
     const cb = app.callback();
-    const server = ENV === 'prod'
+    const server = ENV === 'local'
         ? http.createServer(cb)
         : https.createServer({
             key: fs.readFileSync(path.resolve(process.cwd(), 'certs/privkey.pem'), 'utf8').toString(),
