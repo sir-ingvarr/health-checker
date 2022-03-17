@@ -32,13 +32,16 @@ const DataProvider = ({ children, childrenProps }) => {
             console.error(e);
         }
     }
-    useEffect(async () => {
-        await refresh();
-        ws.current = new WebSocket(WS_URL);
-        ws.current.addEventListener('open', () => {
-            console.info('ws connected');
-        });
-        ws.current.addEventListener('message', handleMessage);
+    useEffect(() => {
+        const connect = async () => {
+            await refresh();
+            ws.current = new WebSocket(WS_URL);
+            ws.current.addEventListener('open', () => {
+                console.info('ws connected');
+            });
+            ws.current.addEventListener('message', handleMessage);
+        }
+        connect();
     }, []);
 
     return React.cloneElement(children, { ...childrenProps, items, refresh: () => refresh(setItems)});
