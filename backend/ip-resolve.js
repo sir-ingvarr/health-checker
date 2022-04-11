@@ -1,14 +1,20 @@
-const util = require("util");
 const dns = require("dns");
-const lookup = util.promisify(dns.lookup);
 
-const resolveServerIp = async host => {
-    try {
-        const result = await lookup(host);
-        return result;
-    } catch (e) {
-        console.log(e.message);
-    }
-}
+const resolveServerIp = host => new Promise((resolve) => {
+    dns.lookup(host, {all:true}, (err, result) => {
+        if(err)  {
+            console.log(err.message);
+            return resolve({ 4: [], 6: []});
+        }
+        return resolve(result.reduce((acc, val) => {
+            const { family, address } = val;
+            acc[family].push(address);
+            return acc;
+        }, {
+            4: [],
+            6: []
+        }));
+    });
+})
 
 module.exports = {resolveServerIp};

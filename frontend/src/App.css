@@ -1,81 +1,204 @@
 .App {
-  text-align: center;
   display: inline-block;
+}
+
+.b {
+  font-weight: bold;
+}
+
+.flxr {
+  display: flex;
+  flex-direction: row;
+}
+
+.flxc {
+  display: flex;
+  flex-direction: column;
+}
+
+.ac {
+  align-items: center;
+}
+
+.jc {
+  justify-content: center;
+}
+
+.jsb {
+  justify-content: space-between;
+}
+
+.jsa {
+  justify-content: space-around;
+}
+
+.js {
+  justify-content: flex-start;
+}
+
+.je {
+  justify-content: flex-end;
+}
+
+.ae {
+  align-items: flex-end;
+}
+
+.as {
+  align-items: flex-start;
 }
 
 a {
   color: black;
 }
 
+.line {
+  width: 100%;
+  padding: 0;
+}
+
+.long-text {
+  display: block;
+  overflow: hidden;
+  width: 200px;
+  text-overflow: ellipsis;
+}
+
 .item {
   float: left;
-  margin: 10px;
+  margin: 5px;
+  padding: 5px;
   width: 250px;
   border-top: 1px solid darkgrey;
-  border-radius: 10px;
-  display: flex;
+  border-radius: 2px;
   height: 180px;
-  justify-content: space-between;
-  flex-direction: column;
   overflow-x: hidden;
   overflow-y: scroll;
+}
+
+.expanded {
+  margin: auto;
+  width: 500px;
+  height: 400px;
 }
 
 .port-list {
   word-wrap: break-word;
 }
 
-@media screen and (max-width: 450px)  {
-  .item {
-    width: 100vw;
-    margin: 10px 0 0 0;
-  }
+.up-btn {
+
 }
+
 
 .search-bar {
   display: flex;
   height: 90px;
-  width: 100%;
+  width: 100vw;
   justify-content: center;
   align-items: center;
   flex-direction: row;
   font-weight: bold;
 }
 
-.counters {
-  width: 200px;
-  display: flex;
-  flex-direction: row;
-}
-
 .counters>div{
-  width: 20px;
+  min-width: 20px;
   height: 20px;
   margin: 5px;
+  text-align: center;
 }
 
 input[type=text] {
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 10px;
   margin-left: 40px;
   height: 30px;
   width: 250px
 }
 
-.active-item {
+.bt-expand {
+  background-image: url("icons/expand.svg");
+}
+
+.bt-shrink {
+  background-image: url("icons/shrink.svg");
+}
+
+.bt-copy {
+  background-image: url("icons/clipboard.svg");
+}
+
+.bt-expand-down {
+  background-image: url("icons/arrow-down.svg");
+}
+
+.bt-expand-up {
+  background-image: url("icons/arrow-up.svg");
+}
+
+.bt-download {
+  background-image: url("icons/download.svg");
+}
+
+.bt-cross {
+  background-image: url("icons/cross.svg");
+}
+
+.bt-refresh {
+  background-image: url("icons/refresh.svg");
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+}
+
+.btn {
+  background-size: 70%;
+  background-repeat: no-repeat;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(0,0,0,0);
+  background-position: center;
+  transition: background-color .2s linear;
+}
+
+.up-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0,0,0,0.15);
+}
+
+.icon-btn {
+  width: 25px;
+  height: 25px;
+}
+
+.btn:hover {
+  background-color: rgba(0,0,0,0.2);
+}
+
+.btn:active {
+  background-color: rgba(0,0,0,0.3);;
+}
+
+.active {
   background-color: lightgreen;
   border: 2px solid forestgreen;
 }
 
-.inactive-item {
+.inactive {
   background-color: lightcoral;
   border: 2px solid darkred;
 }
 
-.protected-item {
+.protected {
   background-color: gold;
   border: 2px solid darkgoldenrod;
 }
 
-.loading-item {
+.loading {
   background-color: floralwhite;
   border: 2px solid midnightblue;
 }
@@ -83,4 +206,27 @@ input[type=text] {
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+@media screen and (max-width: 560px)  {
+  .item {
+    transition: none;
+    width: 97vw;
+    margin: 10px 0 0 0;
+  }
+
+  input[type=text] {
+    margin: 0;
+    height: 70px;
+    width: 250px
+  }
+
+  .long-text {
+    width: 80vw;
+  }
+
+  /*  .icon-btn {*/
+  /*  width: 40px;*/
+  /*  height: 40px;*/
+  /*}*/
 }

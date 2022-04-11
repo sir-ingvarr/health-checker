@@ -6,12 +6,19 @@ const { REACT_APP_API_URL: API_URL, REACT_APP_WS_URL: WS_URL } = process.env;
 
 const DataProvider = ({ children, childrenProps }) => {
     const [items, setItems] = useState({});
+    const [updates, setUpdates] = useState({});
     const ws = useRef(null);
     const itemsRef = useRef(items);
+    const updatesRef = useRef(updates);
 
     const updateItems = (data) => {
         setItems(data);
         itemsRef.current = data;
+    }
+
+    const changeUpdatesList = updateList => {
+        setUpdates(updateList);
+        updatesRef.current = updateList;
     }
 
     const refresh = async () => {
@@ -27,13 +34,26 @@ const DataProvider = ({ children, childrenProps }) => {
             const eventData = JSON.parse(payload.data);
             const { name, data } = eventData;
             const currentData = itemsRef.current[name] || {};
-            updateItems({ ...itemsRef.current, [name]: { ...currentData, ...data }});
+            const update = { [name]: Object.assign({}, currentData, data) };
+            changeUpdatesList(Object.assign({}, updatesRef.current, update))
         } catch (e) {
             console.error(e);
         }
     }
     useEffect(() => {
         const connect = async () => {
+
+            setInterval(() => {
+                const newData = Object.assign({}, itemsRef.current);
+                const currentUpdates = updatesRef.current;
+                const keys = Object.keys(currentUpdates);
+                for(let key of keys) {
+                    newData[key] = currentUpdates[key];
+                }
+                changeUpdatesList({})
+                updateItems(newData);
+            }, 5000);
+
             await refresh();
             ws.current = new WebSocket(WS_URL);
             ws.current.addEventListener('open', () => {

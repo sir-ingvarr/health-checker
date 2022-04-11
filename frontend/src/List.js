@@ -1,60 +1,15 @@
 import './App.css';
 import React, {useState} from 'react';
+import SearchBar from "./SearchBar";
+import SiteCard from "./SiteCard";
+import UpBtn from "./UpBtn";
+import {Pagination} from "@mui/material";
 
-const Item = ({protocol, name, alive, reason, time, ip, ports}) => {
-    let className;
-    if(reason === 'loading') className = 'loading-item';
-    else {
-        className = alive
-            ? 'active-item'
-            : reason && (['protected', 'protected?', 'ssl'].includes(reason))
-                ? 'protected-item'
-                : 'inactive-item';
-    }
-    return (
-            <div className={`item ${className}`}>
-                <a href={`${protocol}://${name}`} target='_blank' rel='noreferrer'>
-                    <span><b>{`${protocol}://${name}`}</b></span>
-                </a>
-                <span><b>{`IP: ${ip}`}</b></span>
-                <span className="port-list">{`Open ports: ${ports && ports.length ? ports.join(',') : ip && !ports ? 'loading...' : 'none'}`}</span>
-                {reason ? <span>Reason: {reason}</span> : null}
-                {time ? <span>Response time: {time} ms</span> : null}
-                { ip
-                    ? <input type='button' value='Copy IP' onClick={() => navigator.clipboard.writeText(ip)}/>
-                    : null
-                }
-                <input type='button' value='Copy address' onClick={() => navigator.clipboard.writeText(name)}/>
-                <a style={{width: '100%'}} href={'data:text/plain;charset=utf-8,'+encodeURIComponent(JSON.stringify({
-                    host: `${protocol}://${name}`,
-                    ip, ports
-                }))} download={`${name}.json`}>
-                <input style={{width: '100%'}} type='button' value='Download JSON'/>
-                </a>
-
-            </div>
-    );
-}
-
-const SearchBar = ({onSubmit, onChange}) => {
-    const [text, setText] = useState('');
-    return (
-        <div className='search-bar'>
-            <label>Search</label>
-            <input type='text' value={text} onChange={e => {
-                const { value } = e.target;
-                setText(value);
-                onChange(value);
-            }}/>
-            {
-                onSubmit ? <input type='button' value='search' onClick={() => onSubmit(text)}/> : null
-            }
-        </div>
-    );
-};
+const ITEM_PER_PAGE = 24;
 
 const List = ({ refresh, items }) => {
     const [searchRegex, setSearchRegex] = useState(null);
+    const [page, setPage] = useState(1);
 
     const processSearchText = val => {
         if(val && val !== '') return setSearchRegex(new RegExp(val, 'gi'));
@@ -65,13 +20,15 @@ const List = ({ refresh, items }) => {
     const counters = {
         active: 0,
         inactive: 0,
-        protected: 0
+        protected: 0,
+        total: 0
     }
     if(searchRegex) {
         sites = sites.filter(val => searchRegex.test(val));
     }
     sites = sites
         .map(site => {
+            counters.total++;
             const item = items[site];
             if(!item.alive) {
                 if(['protected', 'protected?', 'ssl'].includes(item.reason)) counters.protected++;
@@ -83,34 +40,43 @@ const List = ({ refresh, items }) => {
             const x = items[a].alive;
             const y = items[b].alive;
             return (x === y)? 0 : x? -1 : 1;
-        });
+        }).slice((page - 1) * ITEM_PER_PAGE, page * ITEM_PER_PAGE);
+    const topRef = React.createRef();
 
     return (
         <React.Fragment>
-        <input type='button' value={'refresh'} onClick={refresh} />
-        <SearchBar onChange={processSearchText}/>
-        <div className='counters'>
-            <div className='active-item'>{counters.active}</div>
-            <div className='inactive-item'>{counters.inactive}</div>
-            <div className='protected-item'>{counters.protected}</div>
-        </div>
-        <div className='App'>
-            {
-                sites.map((val, i) => {
-                    const item = items[val];
-                    return <Item
-                        key={i}
-                        name={val}
-                        alive={item.alive}
-                        reason={item.reason}
-                        time={item.time}
-                        protocol={item.protocol}
-                        ip={item.address}
-                        ports={item.portsMap}
-                    />
-                })
-            }
-        </div>
+            <div ref={topRef}></div>
+            <UpBtn place={topRef} />
+            <input className={"btn icon-btn bt-refresh"} type='button' onClick={refresh} />
+            <SearchBar onChange={processSearchText}/>
+            <div className='flxr js ac counters'>
+                <div className='active'>{counters.active}</div>
+                <div className='inactive'>{counters.inactive}</div>
+                <div className='protected'>{counters.protected}</div>
+            </div>
+            <div className='App'>
+                {
+                    sites.map((val, i) => {
+                        const item = items[val];
+                        return <SiteCard
+                            key={i}
+                            name={val}
+                            alive={item.alive}
+                            reason={item.reason}
+                            time={item.time}
+                            protocol={item.protocol}
+                            addressList={item.addressList}
+                            ports={item.portsMap}
+                        />
+                    })
+                }
+            </div>
+            <Pagination
+                count={Math.ceil(counters.total / ITEM_PER_PAGE)}
+                page={page}
+                onChange={(e, val) => setPage(val)}
+                showFirstButton showLastButton
+            />
         </React.Fragment>
     );
 }
