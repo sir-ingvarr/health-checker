@@ -9,7 +9,14 @@ let worker;
 const spawnPortScanner = host => {
     if(jobRunning) return;
     const data = getSiteData(host);
-    const {address} = data;
+    const {addressList} = data;
+    const address = addressList
+        ? addressList['4'] && addressList['4'].length
+            ? addressList['4'][0]
+            : addressList['6'] && addressList['6'].length
+                ? addressList['6'][0]
+                : null
+        : null;
     if(!address) {
         getNextElement();
         return;
@@ -33,7 +40,9 @@ const addScanPortsJobToQueue = host => {
         spawnPortScanner(host);
         return;
     }
-    if(!jobQueue.includes(host)) jobQueue.push(host);
+    if(jobQueue.includes(host)) return;
+
+    jobQueue.push(host);
 }
 
 const removeScanPortsJobFromQueue = host => {

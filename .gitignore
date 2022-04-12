@@ -4,3 +4,4 @@ build
 well-known
 .env
 .DS_Store
+cache.json

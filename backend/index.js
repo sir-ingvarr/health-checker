@@ -57,7 +57,7 @@ const start = async () => {
         const host = urlData.host || element;
         await resolveAndSetIp(host, fileData)
         if(ENV === 'local') continue;
-        if(fileData[host] && fileData[host].ports && fileData[host].ports.length) continue;
+        if(fileData[host] && fileData[host].portsMap && fileData[host].portsMap.length) continue;
         addScanPortsJobToQueue(host);
     }
     healthCheck(sitesList);
